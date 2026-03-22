@@ -1,14 +1,21 @@
-const { exec } = require("child_process");
-const path = require("path");
-const fs = require("fs");
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
-const mime = require("mime-types");
+import { exec } from "child_process";
+import path from "path";
+import fs from "fs";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import mime from "mime-types";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({});
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION,
+  region: "ap-south-1",
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    accessKeyId: "AKIAUVIGFTDBEULNEN7Q",
+    secretAccessKey: "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",
   },
 });
 
@@ -39,7 +46,8 @@ async function init() {
     });
 
     // file by file iteration
-    for (const filePath of distFolderContents) {
+    for (const file of distFolderContents) {
+      const filePath = path.join(distFolderPath, file);
       // check whether filePath is a folder?
       if (fs.lstatSync(filePath).isDirectory()) continue;
 
@@ -47,7 +55,7 @@ async function init() {
       // read folder and upload on S3
       const command = new PutObjectCommand({
         Bucket: "cloudkit-outputs",
-        Key: `__outputs/${PROJECT_ID}/${filePath}`,
+        Key: `__outputs/${PROJECT_ID}/${file}`,
         Body: fs.createReadStream(filePath),
         ContentType: mime.lookup(filePath),
       });
