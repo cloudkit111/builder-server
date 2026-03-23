@@ -28,8 +28,8 @@ const __dirname = path.dirname(__filename);
 const s3Client = new S3Client({
   region: "ap-south-1",
   credentials: {
-    accessKeyId: "AKIAUVIGFTDBBC5742PF",
-    secretAccessKey: "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",
+    accessKeyId: "AKIAUVIGFTDBO3JCYJEU",
+    secretAccessKey: "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",
   },
 });
 
@@ -50,16 +50,16 @@ async function init() {
 
   p.stdout.on("error", function (data) {
     console.log("Error:", data.toString());
-    publishlogs("❌ " + data.toString());
+    publishlogs("Error" + data.toString());
   });
 
   p.on("close", async function () {
     console.log("Build complete");
-    publishlogs("✅ Build complete");
+    publishlogs("Build complete");
 
     const distFolderPath = path.join(__dirname, "output", "dist");
 
-    publishlogs("📂 Reading build files...");
+    publishlogs("Reading build files...");
 
     // Read and form array of all files inside the folder recursive true => subfolders
     const distFolderContents = fs.readdirSync(distFolderPath, {
@@ -73,7 +73,7 @@ async function init() {
       if (fs.lstatSync(filePath).isDirectory()) continue;
 
       console.log("uploading...", filePath);
-      publishlogs(`⬆️ Uploading: ${file}`);
+      publishlogs(`Uploading: ${file}`);
       // read folder and upload on S3
       const command = new PutObjectCommand({
         Bucket: "cloudkit-outputs",
@@ -84,11 +84,12 @@ async function init() {
 
       await s3Client.send(command);
       console.log("uploaded", filePath);
-      publishlogs(`✅ Uploaded: ${file}`);
+      publishlogs(`Uploaded: ${file}`);
     }
 
     console.log("Done...");
-    publishlogs("🎉 Deployment Complete!");
+    publishlogs("Deployment Complete!");
+    process.exit(0);
   });
 }
 init();
